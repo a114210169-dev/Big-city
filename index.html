@@ -3,26 +3,385 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>新竹遠東巨城購物中心 - 逛街攻略</title>
-  <!-- 載入 Tailwind CSS -->
+  <title>新竹遠東巨城購物中心 (Big City) - 逛街攻略與樓層導覽</title>
+  
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- 載入 React & ReactDOM CDN -->
+  
+  <!-- React & ReactDOM CDN -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <!-- 載入 Babel 用於即時解析 JSX -->
+  
+  <!-- Babel Standalone (解析 JSX) -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <!-- 載入 Lucide Icons -->
-  <script src="https://unpkg.com/lucide-react@latest/dist/umd/lucide-react.min.js"></script>
+  
+  <!-- Lucide Icons (圖示庫) -->
+  <script src="https://unpkg.com/lucide-react@0.263.1/dist/umd/lucide-react.min.js"></script>
 </head>
-<body class="bg-slate-900 text-slate-100">
+<body class="bg-slate-900 text-slate-100 min-h-screen">
   <div id="root"></div>
 
-  <!-- 在此貼上您的 React 代碼 (type="text/babel") -->
   <script type="text/babel">
     const { useState, useMemo } = React;
-    // 這裡貼上剛才生成的完整 App 程式碼內容...
     
-    // 記得最後要渲染到 #root
+    // 載入 Lucide 圖示
+    const { 
+      Search, MapPin, Clock, DollarSign, Bookmark, BookmarkCheck, 
+      Sparkles, Car, Utensils, ShoppingBag, Film, Gamepad2, 
+      Info, X, ChevronRight, Filter, Navigation, Compass, Star 
+    } = lucide;
+
+    // 樓層資料
+    const FLOOR_DATA = [
+      {
+        id: '8F',
+        name: '8F 威秀影城 & 歡樂娛樂城',
+        category: 'entertainment',
+        description: '極致視聽影城、大魯閣保齡球館與追風奇幻島，休閒娛樂首選。',
+        spots: [
+          { id: 'vieshow', name: '威秀影城 IMAX', tags: ['影城', '視聽特效'], time: '2-3小時', desc: '新竹頂級視聽饗宴，配備 IMAX 大型螢幕與數位環繞音效。', img: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=800&q=80', mustTry: 'IMAX 電影觀賞、爆米花雙人套餐', tip: '建議提前線上訂票免現場排隊。' },
+          { id: 'taroko', name: '大魯閣棒壘球/保齡球館', tags: ['運動', '娛樂'], time: '1-2小時', desc: '室內棒壘球打擊場、保齡球道與美式飛鏢機，朋友聚會最佳去處。', img: 'https://images.unsplash.com/photo-1538510001314-716c14ab6399?auto=format&fit=crop&w=800&q=80', mustTry: '夜光保齡球、棒球打擊測試', tip: '週末人潮較多，建議先登記劃位。' },
+          { id: 'wonderland', name: '追風奇幻島', tags: ['親子', '遊樂'], time: '2-4小時', desc: '專為兒童打造的大型室內攀爬與繩索探索樂園。', img: 'https://images.unsplash.com/photo-1566454825485-614649f63532?auto=format&fit=crop&w=800&q=80', mustTry: '高空繩索體驗、巨型波波池', tip: '大人小孩均需穿著防滑襪入場。' }
+        ]
+      },
+      {
+        id: '7F',
+        name: '7F 舊金山大街主題餐廳',
+        category: 'food',
+        description: '濃濃舊金山金門大橋造景與叮叮車，集合各國主題餐廳與異國美食。',
+        spots: [
+          { id: 'din-tai-fung', name: '鼎泰豐', tags: ['米其林美食', '中式小籠包'], time: '1-1.5小時', desc: '享譽國際的黃金 18 折小籠包與精緻中式點心。', img: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80', mustTry: '招牌小籠包、紅油抄手、排骨蛋炒飯', tip: '抽取號碼牌後可先掃 App 監看叫號情況並離場逛街。' },
+          { id: 'haidilao', name: '海底撈火鍋', tags: ['火鍋', '川味', '極致服務'], time: '1.5-2小時', desc: '貼心服務無極限，提供川劇變臉、甩麵表演與免費美甲服務。', img: 'https://images.unsplash.com/photo-1555126634-323283e090fa?auto=format&fit=crop&w=800&q=80', mustTry: '麻辣雙拼鍋、撈派滑牛、手工撈麵', tip: '深夜營業至凌晨，為宵夜熱門首選。' },
+          { id: 'sf-street', name: '舊金山叮叮車造景', tags: ['網美打卡', '地標'], time: '15-30分鐘', desc: '經典舊金山紅橋與叮叮車實體復刻，隨手拍出異國度假風采。', img: 'https://images.unsplash.com/photo-1506146332389-18140dc7b2fb?auto=format&fit=crop&w=800&q=80', mustTry: '叮叮車車頭合照、復古復刻街景', tip: '下午光線透過天窗照入時拍攝效果最佳。' }
+        ]
+      },
+      {
+        id: '4F',
+        name: '4F 美食廣場 & 運動潮流',
+        category: 'fashion',
+        description: '各大運動品牌旗艦店與豐富的平價異國美食街。',
+        spots: [
+          { id: 'nike', name: 'Nike Kicks Lounge', tags: ['運動', '限量鞋款'], time: '30-45分鐘', desc: '提供最新潮鞋款與客製化產品服務的運動時尚概念店。', img: 'https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=80', mustTry: 'Air Jordan 限量款、客製化 T-shirt', tip: '熱門鞋款發售請關注巨城粉絲專頁公告。' },
+          { id: 'adidas', name: 'Adidas Originals', tags: ['三葉草', '街頭時尚'], time: '30分鐘', desc: '引領街頭潮流的三葉草經典系列與話題聯名款專賣店。', img: 'https://images.unsplash.com/photo-1518002171953-a080ee817e1f?auto=format&fit=crop&w=800&q=80', mustTry: 'Samba / Gazelle 復古鞋款', tip: '經常推出指定專櫃滿額折抵活動。' },
+          { id: 'food-court', name: '4F 誠品美食廣場', tags: ['平價美食', '多元選擇'], time: '45分鐘', desc: '匯聚韓式料理、日式拉麵、鐵板燒與台式小吃的廣闊美食空間。', img: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80', mustTry: '韓式石鍋拌飯、日式豚骨拉麵', tip: '用餐尖峰時段建議先尋找座位再點餐。' }
+        ]
+      },
+      {
+        id: '1F',
+        name: '1F 國際精品 & 流行服飾',
+        category: 'fashion',
+        description: '國際知名時尚大牌、精品香氛與平價快時尚旗艦店。',
+        spots: [
+          { id: 'uniqlo', name: 'UNIQLO 巨城旗艦店', tags: ['快時尚', '基本款'], time: '45-60分鐘', desc: '寬敞舒適的購物環境，商品款式最為齊全。', img: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=80', mustTry: 'HEATTECH 發熱衣、AIRism 涼感系列', tip: '感謝祭期間折扣力度最大。' },
+          { id: 'zara', name: 'ZARA & ZARA Home', tags: ['歐美時尚', '居家設計'], time: '1小時', desc: '與全球同步的時尚男裝、女裝、童裝與精緻居家用品。', img: 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=800&q=80', mustTry: '季節新品洋裝、香氛燭台', tip: '換季折扣季（6月與12月底）非常熱門。' }
+        ]
+      },
+      {
+        id: 'B1',
+        name: 'B1 City Super 超級市場 & 甜點街',
+        category: 'food',
+        description: '頂級進口超市、排隊甜點伴手禮與生活雜貨。',
+        spots: [
+          { id: 'citysuper', name: 'city\'super 頂級超市', tags: ['進口食材', '日本水果'], time: '45分鐘', desc: '提供全球優質生鮮食材、頂級日本和牛與精選清酒。', img: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80', mustTry: '日本空運草莓、現切和牛排', tip: '晚間 8 點後熟食區常有貼標折扣。' },
+          { id: 'donuts', name: 'Mister Donut & 甜點特展', tags: ['甜點', '下午茶'], time: '20分鐘', desc: '季節限定日式波堤甜甜圈與人氣排隊甜點快閃店。', img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=800&q=80', mustTry: '草莓波堤、抹茶雙層波堤', tip: '搭配巨城 VIP 會員經常享買 5 送 1。' }
+        ]
+      }
+    ];
+
+    // 推薦行程資料
+    const ITINERARIES = [
+      { id: 'foodie', name: '吃貨美食之旅', icon: 'Utensils', desc: '專為饕客設計，品嚐米其林推薦與熱門甜點。', floors: ['7F', 'B1'] },
+      { id: 'family', name: '親子同樂半日遊', icon: 'Sparkles', desc: '放電首選！暢玩主題樂園、室內運動與親子餐飲。', floors: ['8F', '4F'] },
+      { id: 'photo', name: '網美打卡必訪', icon: 'Compass', desc: '舊金山異國街景與最潮時尚專櫃一次收藏。', floors: ['7F', '1F'] },
+      { id: 'shopping', name: '時尚潮流購物狂', icon: 'ShoppingBag', desc: '從國際精品到戶外運動品牌，輕鬆補齊潮流裝備。', floors: ['1F', '4F'] }
+    ];
+
+    function BigCityGuide() {
+      const [selectedFloor, setSelectedFloor] = useState('7F');
+      const [selectedCategory, setSelectedCategory] = useState('all');
+      const [searchQuery, setSearchQuery] = useState('');
+      const [activeModalSpot, setActiveModalSpot] = useState(null);
+      const [bookmarks, setBookmarks] = useState([]);
+      const [parkingHours, setParkingHours] = useState(2);
+      const [parkingSpend, setParkingSpend] = useState(1000);
+
+      // 收藏切換
+      const toggleBookmark = (spotId) => {
+        setBookmarks(prev => 
+          prev.includes(spotId) ? prev.filter(id => id !== spotId) : [...prev, spotId]
+        );
+      };
+
+      // 停車費計算邏輯
+      const parkingCalc = useMemo(() => {
+        const ratePerHour = 50;
+        const baseFreeHours = Math.floor(parkingSpend / 1000);
+        const totalFreeHours = Math.min(baseFreeHours, 5);
+        const billableHours = Math.max(0, parkingHours - totalFreeHours);
+        const fee = billableHours * ratePerHour;
+        return { totalFreeHours, fee };
+      }, [parkingHours, parkingSpend]);
+
+      // 篩選出的景點
+      const filteredSpots = useMemo(() => {
+        const currentFloorObj = FLOOR_DATA.find(f => f.id === selectedFloor);
+        if (!currentFloorObj) return [];
+
+        return currentFloorObj.spots.filter(spot => {
+          const matchesSearch = spot.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                spot.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()));
+          const matchesCat = selectedCategory === 'all' || currentFloorObj.category === selectedCategory;
+          return matchesSearch && matchesCat;
+        });
+      }, [selectedFloor, selectedCategory, searchQuery]);
+
+      return (
+        <div class="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
+          {/* 頂部導覽列 */}
+          <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-4 py-3 sm:px-8">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+              <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-r from-amber-500 to-amber-600 p-2.5 rounded-xl text-slate-950 font-bold shadow-lg shadow-amber-500/20">
+                  <Navigation class="w-6 h-6" />
+                </div>
+                <div>
+                  <h1 class="text-xl font-bold bg-gradient-to-r from-amber-200 via-amber-400 to-amber-500 bg-clip-text text-transparent">
+                    新竹巨城購物指南
+                  </h1>
+                  <p class="text-xs text-slate-400">Big City Floor & Food Guide</p>
+                </div>
+              </div>
+
+              {/* 搜尋列 */}
+              <div class="relative w-full md:w-80">
+                <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input 
+                  type="text" 
+                  placeholder="搜尋品牌、餐廳、甜點..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  class="w-full bg-slate-800/80 border border-slate-700/80 rounded-full pl-9 pr-4 py-2 text-sm text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                />
+              </div>
+            </div>
+          </header>
+
+          <main class="max-w-7xl mx-auto px-4 py-6 sm:px-8 flex-1 space-y-8">
+            {/* 主題推薦行程 */}
+            <section class="space-y-4">
+              <div class="flex items-center gap-2">
+                <Sparkles class="w-5 h-5 text-amber-400" />
+                <h2 class="text-lg font-bold text-slate-200">主題情境推薦路線</h2>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {ITINERARIES.map(item => (
+                  <button 
+                    key={item.id}
+                    onClick={() => setSelectedFloor(item.floors[0])}
+                    class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 hover:border-amber-500/50 transition-all text-left group flex flex-col justify-between"
+                  >
+                    <div>
+                      <div class="text-amber-400 font-semibold mb-1 group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+                        {item.name} <ChevronRight class="w-4 h-4" />
+                      </div>
+                      <p class="text-xs text-slate-400 leading-relaxed">{item.desc}</p>
+                    </div>
+                    <div class="mt-3 flex gap-1">
+                      {item.floors.map(f => (
+                        <span key={f} class="text-[10px] bg-slate-700/60 text-amber-300 px-2 py-0.5 rounded">
+                          {f}
+                        </span>
+                      ))}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            {/* 樓層選單 */}
+            <section class="space-y-4">
+              <div class="flex flex-wrap gap-2 pb-2 border-b border-slate-800">
+                {FLOOR_DATA.map(floor => (
+                  <button
+                    key={floor.id}
+                    onClick={() => setSelectedFloor(floor.id)}
+                    class={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                      selectedFloor === floor.id
+                        ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20 scale-105'
+                        : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                    }`}
+                  >
+                    {floor.id}
+                  </button>
+                ))}
+              </div>
+              
+              {/* 當前樓層簡介 */}
+              {FLOOR_DATA.find(f => f.id === selectedFloor) && (
+                <div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-4">
+                  <h3 class="text-lg font-bold text-amber-300">
+                    {FLOOR_DATA.find(f => f.id === selectedFloor).name}
+                  </h3>
+                  <p class="text-sm text-slate-400 mt-1">
+                    {FLOOR_DATA.find(f => f.id === selectedFloor).description}
+                  </p>
+                </div>
+              )}
+            </section>
+
+            {/* 卡片網格列表 */}
+            <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredSpots.map(spot => {
+                const isBookmarked = bookmarks.includes(spot.id);
+                return (
+                  <div 
+                    key={spot.id}
+                    class="bg-slate-800/70 border border-slate-700/60 rounded-2xl overflow-hidden hover:border-amber-500/40 transition-all flex flex-col group"
+                  >
+                    <div class="relative h-48 overflow-hidden">
+                      <img 
+                        src={spot.img} 
+                        alt={spot.name}
+                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <button 
+                        onClick={() => toggleBookmark(spot.id)}
+                        class="absolute top-3 right-3 p-2 bg-slate-900/70 backdrop-blur-md rounded-full text-amber-400 hover:bg-slate-900"
+                      >
+                        {isBookmarked ? <BookmarkCheck class="w-5 h-5 fill-amber-400" /> : <Bookmark class="w-5 h-5" />}
+                      </button>
+                      <span class="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur-md text-amber-300 text-xs px-2.5 py-1 rounded-md flex items-center gap-1">
+                        <Clock class="w-3.5 h-3.5" /> {spot.time}
+                      </span>
+                    </div>
+
+                    <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
+                      <div>
+                        <div class="flex flex-wrap gap-1.5 mb-2">
+                          {spot.tags.map(t => (
+                            <span key={t} class="text-[11px] bg-amber-500/10 text-amber-300 border border-amber-500/20 px-2 py-0.5 rounded-md">
+                              #{t}
+                            </span>
+                          ))}
+                        </div>
+                        <h4 class="text-lg font-bold text-slate-100 group-hover:text-amber-300 transition-colors">
+                          {spot.name}
+                        </h4>
+                        <p class="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">
+                          {spot.desc}
+                        </p>
+                      </div>
+
+                      <button 
+                        onClick={() => setActiveModalSpot(spot)}
+                        class="w-full py-2.5 bg-slate-700/60 hover:bg-amber-500 hover:text-slate-950 text-slate-200 text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5"
+                      >
+                        看詳細與推薦必試 <ChevronRight class="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </section>
+
+            {/* 實用工具：停車費計算器 */}
+            <section class="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-6 space-y-4">
+              <div class="flex items-center gap-2">
+                <Car class="w-5 h-5 text-amber-400" />
+                <h3 class="text-lg font-bold text-slate-200">巨城停車折抵計算器</h3>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-center">
+                <div>
+                  <label class="text-xs text-slate-400 block mb-2">預計停放時間 (小時)</label>
+                  <input 
+                    type="number" 
+                    min="1" 
+                    max="12"
+                    value={parkingHours}
+                    onChange={(e) => setParkingHours(Number(e.target.value))}
+                    class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-slate-100"
+                  />
+                </div>
+                <div>
+                  <label class="text-xs text-slate-400 block mb-2">館內消費金額 (NT$)</label>
+                  <input 
+                    type="number" 
+                    step="500" 
+                    value={parkingSpend}
+                    onChange={(e) => setParkingSpend(Number(e.target.value))}
+                    class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-slate-100"
+                  />
+                </div>
+                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/80 text-center">
+                  <div class="text-xs text-slate-400">預估需支付停車費</div>
+                  <div class="text-2xl font-bold text-amber-400 mt-1">
+                    NT$ {parkingCalc.fee}
+                  </div>
+                  <div class="text-[11px] text-slate-500 mt-1">
+                    (已折抵 {parkingCalc.totalFreeHours} 小時免費停車)
+                  </div>
+                </div>
+              </div>
+            </section>
+          </main>
+
+          {/* 品牌詳情 Modal */}
+          {activeModalSpot && (
+            <div class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+              <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl relative animate-in fade-in zoom-in duration-200">
+                <button 
+                  onClick={() => setActiveModalSpot(null)}
+                  class="absolute top-4 right-4 p-2 bg-slate-950/60 rounded-full text-slate-400 hover:text-slate-100 z-10"
+                >
+                  <X class="w-5 h-5" />
+                </button>
+                <div class="h-56 relative">
+                  <img src={activeModalSpot.img} alt={activeModalSpot.name} class="w-full h-full object-cover" />
+                  <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent" />
+                  <div class="absolute bottom-4 left-6">
+                    <span class="text-xs bg-amber-500 text-slate-950 font-bold px-2.5 py-1 rounded-md">
+                      {selectedFloor}
+                    </span>
+                    <h3 class="text-2xl font-bold text-slate-100 mt-1">{activeModalSpot.name}</h3>
+                  </div>
+                </div>
+                <div class="p-6 space-y-4">
+                  <p class="text-sm text-slate-300 leading-relaxed">{activeModalSpot.desc}</p>
+                  
+                  <div class="bg-slate-800/80 p-3.5 rounded-xl border border-slate-700/60 space-y-1">
+                    <div class="text-xs font-bold text-amber-400 flex items-center gap-1">
+                      <Star class="w-4 h-4" /> 推薦必試 / 必買
+                    </div>
+                    <div class="text-xs text-slate-200">{activeModalSpot.mustTry}</div>
+                  </div>
+
+                  <div class="bg-slate-800/80 p-3.5 rounded-xl border border-slate-700/60 space-y-1">
+                    <div class="text-xs font-bold text-amber-400 flex items-center gap-1">
+                      <Info class="w-4 h-4" /> 逛街小貼士
+                    </div>
+                    <div class="text-xs text-slate-300">{activeModalSpot.tip}</div>
+                  </div>
+
+                  <button 
+                    onClick={() => setActiveModalSpot(null)}
+                    class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl transition-colors"
+                  >
+                    關閉視窗
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 頁腳 */}
+          <footer class="border-t border-slate-800 bg-slate-950 py-6 px-4 text-center text-xs text-slate-500">
+            <p>新竹遠東巨城購物中心 (Big City) 互動導覽網站 - 網頁部署示範</p>
+          </footer>
+        </div>
+      );
+    }
+
+    // 渲染至 Root 節點
     ReactDOM.createRoot(document.getElementById('root')).render(<BigCityGuide />);
   </script>
 </body>
