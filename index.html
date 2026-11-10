@@ -1,0 +1,1126 @@
+import React, { useState, useMemo } from 'react';
+import { 
+  Search, MapPin, Clock, Car, Phone, Star, Heart, CheckCircle, 
+  Info, Sparkles, Navigation, X, ExternalLink, ChevronRight,
+  Utensils, ShoppingBag, Film, Gamepad2, BookOpen, Baby, Coffee, Check, Calculator, Tag
+} from 'lucide-react';
+
+// --- DATA STRUCTURES ---
+const FLOORS_DATA = [
+  {
+    id: '8F',
+    name: '8F 室內運動與娛樂城',
+    subtitle: '動感休閒 / 室內運動 / 歡樂派對',
+    bannerImg: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1200&q=80',
+    description: '匯集運動娛樂設施與異國美食，包含大魯閣棒壘球場與保齡球館，是全家大小運動與朋友聚會的絕佳去處。',
+    highlights: ['大魯閣棒壘球/保齡球場', '湯姆熊歡樂世界', '姜滿堂韓國直火烤肉'],
+    spots: [
+      {
+        id: 'taroko-8f',
+        name: '大魯閣棒壘球 / 保齡球館',
+        category: '娛樂影城',
+        tags: ['運動', '打卡', '保齡球', '棒球'],
+        image: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=600&q=80',
+        stayTime: '1.5 - 2.5 小時',
+        location: '8F 核心區',
+        phone: '03-533-5268',
+        mustTry: '夜光保齡球時段、打擊練習籠',
+        description: '提供極具特色的夜光保齡球賽道、大眾棒壘球打擊場與飛鏢機，是聚會紓壓的首選娛樂場所。',
+        rating: 4.8
+      },
+      {
+        id: 'tom-bear-8f',
+        name: '湯姆熊歡樂世界',
+        category: '娛樂影城',
+        tags: ['親子', '遊樂場', '夾娃娃'],
+        image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=600&q=80',
+        stayTime: '1 - 2 小時',
+        location: '8F 側區',
+        phone: '03-535-6500',
+        mustTry: '賽車模擬器、音樂節奏機、彩票換贈品',
+        description: '全台知名的室內主題樂園，配備各式最新大型體感遊戲機台與豐富的禮品兌換系統。',
+        rating: 4.6
+      },
+      {
+        id: 'jiangman-8f',
+        name: '姜滿堂 韓國直火烤肉',
+        category: '餐飲美食',
+        tags: ['韓式燒肉', '聚餐', '和牛'],
+        image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+        stayTime: '1.5 小時',
+        location: '8F 主題餐廳區',
+        phone: '03-535-2268',
+        mustTry: '日本A5和牛組合、韓式海鮮煎餅、包肉生菜無限續',
+        description: '嚴選頂級肉品搭配道地韓式特調醬汁與直火烤肉，無限量供應韓國小菜與優質包肉生菜。',
+        rating: 4.7
+      }
+    ]
+  },
+  {
+    id: '7F',
+    name: '7F 舊金山主題大街與異國餐廳',
+    subtitle: '打卡聖地 / 主題造景 / 異國美食料理',
+    bannerImg: 'https://images.unsplash.com/photo-1506146332389-18140dc7b2fb?auto=format&fit=crop&w=1200&q=80',
+    description: '巨城最具代表性的景點！1:1實景打造舊金山叮叮車與紅色金門大橋造景，伴隨各國異國主題名店。',
+    highlights: ['1:1 舊金山叮叮車造景', '金色三麥', '新馬辣經典麻辣鍋', '涓豆腐'],
+    spots: [
+      {
+        id: 'sf-tram-7f',
+        name: '舊金山叮叮車與大橋主題區',
+        category: '娛樂影城',
+        tags: ['打卡', '景點', '免門票'],
+        image: 'https://images.unsplash.com/photo-1506146332389-18140dc7b2fb?auto=format&fit=crop&w=600&q=80',
+        stayTime: '20 - 30 分鐘',
+        location: '7F 中央廣場',
+        phone: '巨城服務台',
+        mustTry: '叮叮車車廂合照、金門大橋拱門視角',
+        description: '室內挑高造景重現舊金山街景，包含經典叮叮車車體與紅色鋼樑建築風格，吸引無數遊客打卡拍照。',
+        rating: 4.9
+      },
+      {
+        id: 'lebleu-7f',
+        name: '金色三麥 Le Rouge',
+        category: '餐飲美食',
+        tags: ['鮮啤酒', '美式料理', '聚餐'],
+        image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=600&q=80',
+        stayTime: '2 小時',
+        location: '7F 主題大道區',
+        phone: '03-531-5555',
+        mustTry: '蜂蜜啤酒、大拼盤、酥炸椒麻雞',
+        description: '提供經典冠軍現釀啤酒與豐富的聚餐拼盤，現場經常有賽事直播與熱烈歡樂氛圍。',
+        rating: 4.7
+      },
+      {
+        id: 'mala-7f',
+        name: '新馬辣經典麻辣鍋 Plus+',
+        category: '餐飲美食',
+        tags: ['火鍋吃到飽', '和牛', '哈根達斯'],
+        image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80',
+        stayTime: '2 小時',
+        location: '7F 異國美食區',
+        phone: '03-531-0213',
+        mustTry: '美和牛雙降、九孔鮑魚、哈根達斯冰淇淋自由',
+        description: '高檔麻辣鴛鴦鍋吃到飽，嚴選各式頂級肉品、生食級海鮮與數十款頂級冰淇淋。',
+        rating: 4.8
+      },
+      {
+        id: 'dubuhouse-7f',
+        name: '涓豆腐 DUBU House',
+        category: '餐飲美食',
+        tags: ['韓式豆腐鍋', '韓式小菜無限', '海鮮煎餅'],
+        image: 'https://images.unsplash.com/photo-1553163147-622ab57be1c7?auto=format&fit=crop&w=600&q=80',
+        stayTime: '1.5 小時',
+        location: '7F 異國美食區',
+        phone: '03-534-5666',
+        mustTry: '嫩豆腐煲、韓式石鍋飯、黑糖香柚豆花',
+        description: '韓國第一大豆腐煲專門店，招牌嫩豆腐煲湯頭濃郁，搭配無限續點的多款韓國精緻小菜。',
+        rating: 4.6
+      }
+    ]
+  },
+  {
+    id: '6F',
+    name: '6F 健康休閒與生活館',
+    subtitle: '健身中心 / 健康養生 / 舒壓按摩',
+    bannerImg: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200&q=80',
+    description: '專為現代個人與家庭打造的健康休閒空間，包含大型健身俱樂部與各類保健養生服務。',
+    highlights: ['World Gym 健身俱樂部', '養生按摩體驗', '健康家電展示館'],
+    spots: [
+      {
+        id: 'worldgym-6f',
+        name: 'World Gym 巨城旗艦館',
+        category: '生活雜貨',
+        tags: ['健身', '飛輪', '游泳池'],
+        image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80',
+        stayTime: '1 - 2 小時',
+        location: '6F 全區',
+        phone: '03-535-7000',
+        mustTry: '有氧瑜伽團課、心肺訓練區',
+        description: '擁有寬敞頂級訓練器材、各式專屬課程空間，提供新竹運動愛好者全方位的健康體驗。',
+        rating: 4.5
+      }
+    ]
+  },
+  {
+    id: '5F',
+    name: '5F 文藝親子與書香生活',
+    subtitle: '誠品書店 / 親子同樂 / 玩具童裝 / 精緻餐飲',
+    bannerImg: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1200&q=80',
+    description: '豐富的親子互動環境與文藝空間，誠品書店陪伴閱讀歲月，玩具與精緻簡餐帶來溫馨家庭時光。',
+    highlights: ['誠品書店 & 誠品文具', 'Funbox Toys 玩具特區', '屯京拉麵', 'CoCo壹番屋'],
+    spots: [
+      {
+        id: 'eslite-5f',
+        name: '誠品書店 / Eslite Spectrum',
+        category: '生活雜貨',
+        tags: ['文青', '書籍', '文具禮品'],
+        image: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=600&q=80',
+        stayTime: '1 - 2 小時',
+        location: '5F 誠品專區',
+        phone: '03-610-5688',
+        mustTry: '暢銷書展示牆、誠品風格選物',
+        description: '結合人文閱讀與生活設計風格，提供舒適的閱讀角與多樣化的風格文具與精選禮品。',
+        rating: 4.9
+      },
+      {
+        id: 'funbox-5f',
+        name: 'Funbox Toys 樂高專賣',
+        category: '生活雜貨',
+        tags: ['親子', '玩具', 'LEGO'],
+        image: 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=600&q=80',
+        stayTime: '45 分鐘',
+        location: '5F 親子館區',
+        phone: '03-533-8820',
+        mustTry: '樂高積木展示區、限量版鋼彈模型',
+        description: '全台知名的連鎖玩具館，販售包含 LEGO、迪士尼、鋼彈及各式各樣熱門動漫IP周邊產品。',
+        rating: 4.7
+      },
+      {
+        id: 'tonchin-5f',
+        name: '屯京拉麵 Tonchin',
+        category: '餐飲美食',
+        tags: ['日式拉麵', '東京豚骨', '大碗不加價'],
+        image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80',
+        stayTime: '45 分鐘',
+        location: '5F 美食主題區',
+        phone: '03-535-0568',
+        mustTry: '超值東京豚骨拉麵、黃金蛋、魚介豚骨',
+        description: '來自東京池袋的道地日本拉麵，濃郁豚骨湯頭與自家製中粗捲麵條，中碗大碗價格一致超划算。',
+        rating: 4.6
+      }
+    ]
+  },
+  {
+    id: '4F',
+    name: '4F 威秀影城與歡樂美食廣場',
+    subtitle: '威秀影城 / 異國美食街 / 復古老街區',
+    bannerImg: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80',
+    description: '新竹熱門的觀影娛樂中心與全方位美食廣場，獨具特色的台灣懷舊復古老街造景令人駐足。',
+    highlights: ['威秀影城 (VIESHOW)', '燒肉LIKE', '點點心港式點心', '復古懷舊老街美食區'],
+    spots: [
+      {
+        id: 'vieshow-4f',
+        name: '新竹巨城威秀影城',
+        category: '娛樂影城',
+        tags: ['電影', 'IMAX', '爆米花'],
+        image: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=600&q=80',
+        stayTime: '2 - 3 小時',
+        location: '4F 影城專區',
+        phone: '03-535-3888',
+        mustTry: 'IMAX高畫質巨幕體驗、吉司爆米花',
+        description: '配備現代化影音設備與IMAX大螢幕，影城入口寬暢舒適，提供無與倫比的視聽震撼饗宴。',
+        rating: 4.8
+      },
+      {
+        id: 'yakiniku-like-4f',
+        name: '燒肉LIKE (Yakiniku LIKE)',
+        category: '餐飲美食',
+        tags: ['單人燒肉', '日式平價', '個人無煙'],
+        image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+        stayTime: '45 分鐘',
+        location: '4F 美食廣場區',
+        phone: '無現場訂位/現場排隊',
+        mustTry: '牛五花&松阪豬套餐、獨家蒜香燒肉醬',
+        description: '源自日本的「單人獨享」無煙燒肉專賣店，提供一人一爐的輕鬆用餐環境與迅速出餐服務。',
+        rating: 4.7
+      },
+      {
+        id: 'dimdimsum-4f',
+        name: '點點心 DimDimSum',
+        category: '餐飲美食',
+        tags: ['港式飲茶', '豬仔流沙包', '打卡'],
+        image: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=600&q=80',
+        stayTime: '1 小時',
+        location: '4F 異國美食街',
+        phone: '03-542-6980',
+        mustTry: '豬仔流沙包、蔥油雞扒撈麵、松露蝦餃皇',
+        description: '來自香港的人氣點心品牌，注入創意元素的經典港點，外型吸睛且風味絕佳。',
+        rating: 4.6
+      }
+    ]
+  },
+  {
+    id: '3F',
+    name: '3F 酷樂潮流與鞋飾配件',
+    subtitle: '潮流服飾 / 質感鞋飾 / 時尚眼鏡 / 戶外流行',
+    bannerImg: 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=1200&q=80',
+    description: '匯聚潮流休閒穿搭、時尚配件與各大品牌鞋款，是年輕世代探索個人特色的逛街首選。',
+    highlights: ['ABC-MART Grand Stage', 'BIRKENSTOCK 勃肯', 'OWNDAYS 快時尚眼鏡'],
+    spots: [
+      {
+        id: 'abcmart-3f',
+        name: 'ABC-MART Grand Stage',
+        category: '時尚服飾',
+        tags: ['鞋款', '潮鞋', 'Nike', 'Adidas'],
+        image: 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=600&q=80',
+        stayTime: '30 - 45 分鐘',
+        location: '3F 潮流大道',
+        phone: '03-535-0818',
+        mustTry: 'Grand Stage獨家限定鞋款、潮流休閒服飾',
+        description: '比一般分店更高規格的 Grand Stage 店型，嚴選最新限定球鞋與日本日潮流行服飾。',
+        rating: 4.7
+      },
+      {
+        id: 'owndays-3f',
+        name: 'OWNDAYS 快時尚眼鏡',
+        category: '生活雜貨',
+        tags: ['配鏡', '日系眼鏡', '20分鐘取件'],
+        image: 'https://images.unsplash.com/photo-1591076482161-42ce6da69f67?auto=format&fit=crop&w=600&q=80',
+        stayTime: '45 分鐘',
+        location: '3F 專櫃區',
+        phone: '03-533-3112',
+        mustTry: '薄型非球面鏡片免費配、記憶金屬鏡框',
+        description: '日系連鎖快速配鏡服務，標榜價格透明、快速取件與全方位的完善售後服務。',
+        rating: 4.6
+      }
+    ]
+  },
+  {
+    id: '2F',
+    name: '2F 戶外遊趣與休閒生活',
+    subtitle: '戶外運動品牌 / 美容保養 / 藏壽司主題館',
+    bannerImg: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=1200&q=80',
+    description: '結合專業戶外裝備、時尚居家香氛美妝與深受喜愛的旋轉壽司體驗。',
+    highlights: ['The North Face 旗艦店', '藏壽司 (Kurazushi)', 'THE BODY SHOP'],
+    spots: [
+      {
+        id: 'kura-2f',
+        name: '藏壽司 Kura Sushi',
+        category: '餐飲美食',
+        tags: ['迴轉壽司', '扭蛋', '日式料理'],
+        image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=600&q=80',
+        stayTime: '1 小時',
+        location: '2F 美食館區',
+        phone: 'E-kurabox App 預約',
+        mustTry: '炙烤照燒鮭魚、茶碗蒸、每5盤抽扭蛋',
+        description: '源自日本的平價迴轉壽司，獨家鮮度君保鮮蓋與回收餐盤抽扭蛋系統，充滿樂趣。',
+        rating: 4.8
+      },
+      {
+        id: 'tnf-2f',
+        name: 'The North Face 北面旗艦店',
+        category: '時尚服飾',
+        tags: ['戶外機能', 'GORE-TEX', '羽絨外套'],
+        image: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80',
+        stayTime: '30 分鐘',
+        location: '2F 戶外區',
+        phone: '03-535-6188',
+        mustTry: 'Icon 1996羽絨外套、防水登山外套',
+        description: '全球知名的戶外運動品牌，提供頂級機能防水外套、登山露營裝備與潮流街頭系列。',
+        rating: 4.7
+      }
+    ]
+  },
+  {
+    id: '1F',
+    name: '1F 國際精品與時尚潮流',
+    subtitle: '旗艦名店 / 3C科技 / 時尚咖啡與下午茶',
+    bannerImg: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80',
+    description: '門面招牌樓層，匯聚國際時尚巨擘、科技旗艦專賣店與知名優雅咖啡廳。',
+    highlights: ['Apple 授權旗艦店', 'H&M 旗艦店', 'lululemon', 'PAUL 法國麵包甜點', '星巴克'],
+    spots: [
+      {
+        id: 'apple-1f',
+        name: 'Apple 授權旗艦專賣店',
+        category: '生活雜貨',
+        tags: ['3C', 'iPhone', 'MacBook'],
+        image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=600&q=80',
+        stayTime: '30 - 45 分鐘',
+        location: '1F 門市入口區',
+        phone: '03-610-5800',
+        mustTry: '最新 iPhone 實機體驗、MagSafe 周邊',
+        description: '寬敞明亮的新一代展示空間，提供全系列 Apple 產品展示體驗與專業人員諮詢解答。',
+        rating: 4.8
+      },
+      {
+        id: 'lululemon-1f',
+        name: 'lululemon 運動服飾',
+        category: '時尚服飾',
+        tags: ['瑜伽', '運動時尚', 'Align褲款'],
+        image: 'https://images.unsplash.com/photo-1518310383802-640c2de311b2?auto=format&fit=crop&w=600&q=80',
+        stayTime: '30 - 45 分鐘',
+        location: '1F 時尚大道',
+        phone: '03-535-3001',
+        mustTry: 'Align 超軟布料瑜伽褲、Everyday 背包',
+        description: '來自加拿大的高品質瑜伽與運動服飾品牌，以極致舒適的觸感與親膚立體剪裁聞名。',
+        rating: 4.9
+      },
+      {
+        id: 'paul-1f',
+        name: 'PAUL 法國麵包甜點沙龍',
+        category: '餐飲美食',
+        tags: ['法式甜點', '千層派', '早午餐'],
+        image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80',
+        stayTime: '1 - 1.5 小時',
+        location: '1F 沿街戶外區',
+        phone: '03-515-2180',
+        mustTry: '草莓千層派、法式老麵包、嫩煎干貝早午餐',
+        description: '源自1889年的法國百年烘焙品牌，奢華高雅的法式沙龍氛圍，適合精緻下午茶與約會。',
+        rating: 4.6
+      }
+    ]
+  },
+  {
+    id: 'B1',
+    name: 'B1 樂活休閒與生活美學',
+    subtitle: '日系快時尚 / 家居雜貨 / 藥妝保健 / 輕食咖啡',
+    bannerImg: 'https://images.unsplash.com/photo-1528698827591-e19ccd7bc23d?auto=format&fit=crop&w=1200&q=80',
+    description: '佔地廣大的超人氣生活購物層，集結 UNIQLO, GU, MUJI 等日系大型旗艦品牌。',
+    highlights: ['UNIQLO 巨城店', 'GU 快時尚', 'MUJI 無印良品', 'DAISO 大創百貨', '松本清藥妝'],
+    spots: [
+      {
+        id: 'uniqlo-b1',
+        name: 'UNIQLO 巨城旗艦店',
+        category: '時尚服飾',
+        tags: ['日系服飾', 'Heattech', 'AIRism'],
+        image: 'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=600&q=80',
+        stayTime: '45 - 60 分鐘',
+        location: 'B1 核心區',
+        phone: '03-532-0250',
+        mustTry: 'UT聯名系列、AIRism涼感內著、寬版長褲',
+        description: '新竹地區商品最齐全的 UNIQLO 店型，提供男女裝、童裝與各式機能日常基本服飾。',
+        rating: 4.8
+      },
+      {
+        id: 'muji-b1',
+        name: 'MUJI 無印良品',
+        category: '生活雜貨',
+        tags: ['極簡風格', '文具', '零食', '懶人沙發'],
+        image: 'https://images.unsplash.com/photo-1528698827591-e19ccd7bc23d?auto=format&fit=crop&w=600&q=80',
+        stayTime: '45 分鐘',
+        location: 'B1 專區',
+        phone: '03-531-2951',
+        mustTry: '微粒舒適沙發、草莓白巧克力、懶人保養液',
+        description: '展現極簡日常生活美學，販售純棉服飾、質感家具、生活用品與人氣日系美食零食。',
+        rating: 4.9
+      },
+      {
+        id: 'matsumotokiyoshi-b1',
+        name: '松本清 Matsumoto Kiyoshi',
+        category: '生活雜貨',
+        tags: ['日本藥妝', '保養品', '獨家面膜'],
+        image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=600&q=80',
+        stayTime: '30 分鐘',
+        location: 'B1 美妝專區',
+        phone: '03-535-6010',
+        mustTry: 'MK Customer自有品牌商品、日系限定眼藥水',
+        description: '直營日本熱門藥妝門市，提供最新同步日本潮流的美妝商品、生活藥品與獨家保健品。',
+        rating: 4.7
+      }
+    ]
+  },
+  {
+    id: 'B3',
+    name: 'B3 巨城超市與生活廣場',
+    subtitle: '愛買 a-mart / 生鮮超市 / 機車停車場 / 汽車停車場',
+    bannerImg: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=1200&q=80',
+    description: '提供豐富日常生活用品採買的大型量販超市與廣阔的停車場入口設施。',
+    highlights: ['愛買 a-mart 量販超市', '汽車/機車停車場', '自助洗車服務'],
+    spots: [
+      {
+        id: 'amart-b3',
+        name: '愛買 a-mart 量販超市',
+        category: '生活雜貨',
+        tags: ['生鮮採買', '量販折扣', '熟食區'],
+        image: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=600&q=80',
+        stayTime: '45 - 60 分鐘',
+        location: 'B3 主體區',
+        phone: '0800-086-888',
+        mustTry: '現烤家常熟食、進口新鮮水果、家庭大包裝特惠',
+        description: '提供極具競爭力價格的生鮮食材、零食飲品與居家大宗用品採買，為新竹在地人的購物好幫手。',
+        rating: 4.5
+      }
+    ]
+  }
+];
+
+const ROUTE_RECOMMENDATIONS = [
+  {
+    id: 'foodie',
+    title: '吃貨美食終極之旅',
+    icon: Utensils,
+    tag: '熱門美味',
+    desc: '網羅巨城超人氣排隊美食！從異國火鍋、迴轉壽司到經典港點與法式甜點一次解鎖。',
+    stops: [
+      { floor: '7F', name: '新馬辣經典麻辣鍋 Plus+' },
+      { floor: '4F', name: '點點心 DimDimSum' },
+      { floor: '2F', name: '藏壽司 Kura Sushi' },
+      { floor: '1F', name: 'PAUL 法國麵包甜點沙龍' }
+    ]
+  },
+  {
+    id: 'family',
+    title: '溫馨親子一日遊',
+    icon: Baby,
+    tag: '全家大小',
+    desc: '放電娛樂與溫馨閱讀並重，孩子開心遊玩、爸媽輕鬆購物與享用美食。',
+    stops: [
+      { floor: '8F', name: '湯姆熊歡樂世界' },
+      { floor: '5F', name: 'Funbox Toys 樂高專賣' },
+      { floor: '5F', name: '誠品書店 / Eslite Spectrum' },
+      { floor: '4F', name: '新竹巨城威秀影城' }
+    ]
+  },
+  {
+    id: 'instagram',
+    title: '網美絕美打卡巡禮',
+    icon: Sparkles,
+    tag: '拍照必備',
+    desc: '捕捉舊金山主題街造景、享用極具視覺震撼的精緻甜點與美式鮮啤酒氛圍。',
+    stops: [
+      { floor: '7F', name: '舊金山叮叮車與大橋主題區' },
+      { floor: '7F', name: '金色三麥 Le Rouge' },
+      { floor: '1F', name: 'lululemon 運動服飾' },
+      { floor: '4F', name: '點點心 DimDimSum' }
+    ]
+  },
+  {
+    id: 'shopping',
+    title: '時尚潮流狂歡購物',
+    icon: ShoppingBag,
+    tag: '買爆採購',
+    desc: '鎖定日系快時尚旗艦店與限量潮鞋配件，輕鬆補齊四季時尚衣櫥。',
+    stops: [
+      { floor: 'B1', name: 'UNIQLO 巨城旗艦店' },
+      { floor: 'B1', name: 'MUJI 無印良品' },
+      { floor: '3F', name: 'ABC-MART Grand Stage' },
+      { floor: '1F', name: 'Apple 授權旗艦專賣店' }
+    ]
+  }
+];
+
+export default function App() {
+  const [activeFloor, setActiveFloor] = useState('7F');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('全部');
+  const [modalSpot, setModalSpot] = useState(null);
+  const [favorites, setFavorites] = useState([]);
+  
+  // Parking Calculator State
+  const [parkingHours, setParkingHours] = useState(2);
+  const [spendAmount, setSpendAmount] = useState(1000);
+  const [hasMovieTicket, setHasMovieTicket] = useState(false);
+
+  // Filter spots by query and category
+  const filteredFloorsData = useMemo(() => {
+    return FLOORS_DATA.map(floor => {
+      const filteredSpots = floor.spots.filter(spot => {
+        const matchesSearch = spot.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                              spot.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                              spot.location.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesCat = selectedCategory === '全部' || spot.category === selectedCategory;
+        return matchesSearch && matchesCat;
+      });
+      return { ...floor, spots: filteredSpots };
+    });
+  }, [searchQuery, selectedCategory]);
+
+  const currentFloorData = useMemo(() => {
+    return filteredFloorsData.find(f => f.id === activeFloor) || filteredFloorsData[0];
+  }, [filteredFloorsData, activeFloor]);
+
+  // Favorite toggle
+  const toggleFavorite = (spotId) => {
+    setFavorites(prev => 
+      prev.includes(spotId) ? prev.filter(id => id !== spotId) : [...prev, spotId]
+    );
+  };
+
+  // Parking Fee Calculation logic
+  const calculateParking = () => {
+    // 巨城標準：1小時 $60
+    // 滿500折1小時, 滿1000折2小時, 滿3000折3小時, 滿5000折4小時 (上限4小時)
+    // 憑威秀電影票根可再折抵 3 小時 (上限抵扣可達更久)
+    let discountHours = 0;
+    if (spendAmount >= 5000) discountHours = 4;
+    else if (spendAmount >= 3000) discountHours = 3;
+    else if (spendAmount >= 1000) discountHours = 2;
+    else if (spendAmount >= 500) discountHours = 1;
+
+    if (hasMovieTicket) {
+      discountHours += 3;
+    }
+
+    const payableHours = Math.max(0, parkingHours - discountHours);
+    const totalFee = payableHours * 60;
+
+    return { discountHours, totalFee };
+  };
+
+  const parkingResult = calculateParking();
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased">
+      {/* --- HEADER NAV BAR --- */}
+      <header className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center font-black text-slate-950 text-xl shadow-lg shadow-amber-500/20">
+              BC
+            </div>
+            <div>
+              <h1 className="font-bold text-lg text-white leading-tight">新竹遠東巨城購物中心</h1>
+              <p className="text-xs text-amber-400/80 font-medium tracking-wide">Big City Shopping Guide</p>
+            </div>
+          </div>
+
+          <div className="hidden md:flex items-center space-x-6 text-sm text-slate-300">
+            <a href="#floors" className="hover:text-amber-400 transition">樓層地圖</a>
+            <a href="#routes" className="hover:text-amber-400 transition">主題行程</a>
+            <a href="#practical" className="hover:text-amber-400 transition">交通與停車計算器</a>
+            <a href="#favorites" className="hover:text-amber-400 transition flex items-center gap-1.5">
+              <Heart className="w-4 h-4 text-rose-500 fill-rose-500" />
+              <span>收藏清單 ({favorites.length})</span>
+            </a>
+          </div>
+
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              營業中 (11:00-21:30)
+            </span>
+          </div>
+        </div>
+      </header>
+
+      {/* --- HERO BANNER --- */}
+      <section className="relative overflow-hidden bg-slate-900 py-16 lg:py-24 border-b border-slate-800">
+        <div className="absolute inset-0 z-0 opacity-25 bg-[radial-gradient(#f59e0b_1px,transparent_1px)] [background-size:16px_16px]"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+          <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-widest text-amber-400 bg-amber-400/10 border border-amber-400/20 mb-4">
+            新竹最大型旗艦購物中心攻略
+          </span>
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight max-w-4xl mx-auto leading-tight">
+            吃喝玩樂一站搞定 <br className="hidden sm:inline"/> 
+            <span className="bg-gradient-to-r from-amber-200 via-amber-400 to-amber-500 bg-clip-text text-transparent">
+              巨城全樓層互動導覽地圖
+            </span>
+          </h2>
+          <p className="mt-4 text-base sm:text-lg text-slate-400 max-w-2xl mx-auto">
+            精選超人氣美食、威秀影城、大魯閣娛樂城與舊金山景觀主題大街。隨時搜尋專櫃、規劃完美逛街路線！
+          </p>
+
+          {/* SEARCH & FILTER BAR */}
+          <div className="mt-8 max-w-3xl mx-auto space-y-4">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="搜尋品牌、餐廳、娛樂 (如: 誠品、藏壽司、威秀, UNIQLO)..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-slate-800/90 border border-slate-700 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition shadow-2xl"
+              />
+              {searchQuery && (
+                <button 
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+
+            {/* CATEGORY TABS */}
+            <div className="flex flex-wrap justify-center gap-2 pt-2">
+              {['全部', '餐飲美食', '時尚服飾', '娛樂影城', '生活雜貨'].map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-medium transition ${
+                    selectedCategory === cat 
+                      ? 'bg-amber-400 text-slate-950 font-bold shadow-md shadow-amber-400/20' 
+                      : 'bg-slate-800/80 text-slate-300 border border-slate-700 hover:border-slate-500'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- ROUTE RECOMMENDATIONS --- */}
+      <section id="routes" className="py-12 bg-slate-900/50 border-b border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h3 className="text-2xl font-bold text-white flex items-center gap-2">
+                <Navigation className="w-6 h-6 text-amber-400" />
+                精選行程推薦規劃
+              </h3>
+              <p className="text-sm text-slate-400 mt-1">點擊行程即可查看建議路線與打卡亮點</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {ROUTE_RECOMMENDATIONS.map(route => {
+              const IconComp = route.icon;
+              return (
+                <div 
+                  key={route.id}
+                  className="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-5 hover:border-amber-400/50 transition group flex flex-col justify-between shadow-lg"
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="p-2.5 rounded-xl bg-amber-400/10 text-amber-400 group-hover:bg-amber-400 group-hover:text-slate-950 transition">
+                        <IconComp className="w-5 h-5" />
+                      </div>
+                      <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-700 text-slate-300">
+                        {route.tag}
+                      </span>
+                    </div>
+                    <h4 className="text-lg font-bold text-white group-hover:text-amber-300 transition">{route.title}</h4>
+                    <p className="text-xs text-slate-400 mt-2 leading-relaxed">{route.desc}</p>
+
+                    <div className="mt-4 space-y-2">
+                      <p className="text-xs font-semibold text-slate-300">推薦停留路線：</p>
+                      {route.stops.map((stop, idx) => (
+                        <div key={idx} className="flex items-center justify-between text-xs bg-slate-900/60 px-2.5 py-1.5 rounded-lg border border-slate-800">
+                          <span className="font-bold text-amber-400">{stop.floor}</span>
+                          <span className="text-slate-300 truncate max-w-[140px]">{stop.name}</span>
+                          <button 
+                            onClick={() => {
+                              setActiveFloor(stop.floor);
+                              const el = document.getElementById('floors');
+                              if (el) el.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                            className="text-[10px] text-amber-400 hover:underline flex items-center gap-0.5"
+                          >
+                            前往 <ChevronRight className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* --- MAIN FLOOR NAVIGATOR --- */}
+      <section id="floors" className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          <h3 className="text-2xl font-bold text-white flex items-center gap-2">
+            <MapPin className="w-6 h-6 text-amber-400" />
+            全樓層互動地圖與專櫃導覽
+          </h3>
+          <p className="text-sm text-slate-400 mt-1">選擇樓層探索細節，點擊卡片可查看完整資訊與建議</p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* FLOOR SELECTOR SIDEBAR */}
+          <div className="lg:col-span-3 flex lg:flex-col overflow-x-auto lg:overflow-visible gap-2 pb-2 lg:pb-0 scrollbar-none">
+            {FLOORS_DATA.map(floor => {
+              const isActive = activeFloor === floor.id;
+              const hasMatchingSpots = filteredFloorsData.find(f => f.id === floor.id)?.spots.length > 0;
+              return (
+                <button
+                  key={floor.id}
+                  onClick={() => setActiveFloor(floor.id)}
+                  className={`flex-shrink-0 lg:w-full flex items-center justify-between px-4 py-3.5 rounded-xl border text-left transition ${
+                    isActive
+                      ? 'bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-bold border-amber-400 shadow-lg shadow-amber-500/20 scale-[1.02]'
+                      : hasMatchingSpots
+                      ? 'bg-slate-800/80 text-slate-200 border-slate-700/80 hover:border-slate-500 hover:bg-slate-800'
+                      : 'bg-slate-900/50 text-slate-500 border-slate-800 opacity-60'
+                  }`}
+                >
+                  <div className="flex items-center space-x-3">
+                    <span className={`text-base font-black px-2 py-0.5 rounded ${isActive ? 'bg-slate-950/20 text-slate-950' : 'bg-slate-700/50 text-amber-400'}`}>
+                      {floor.id}
+                    </span>
+                    <span className="text-sm truncate max-w-[130px] font-medium">{floor.name.split(' ')[1] || floor.name}</span>
+                  </div>
+                  <ChevronRight className={`w-4 h-4 hidden sm:block ${isActive ? 'text-slate-950' : 'text-slate-500'}`} />
+                </button>
+              );
+            })}
+          </div>
+
+          {/* FLOOR CONTENT CONTAINER */}
+          <div className="lg:col-span-9 space-y-6">
+            {/* Floor Header Banner */}
+            <div className="relative rounded-2xl overflow-hidden h-48 sm:h-56 border border-slate-700 shadow-xl">
+              <img 
+                src={currentFloorData.bannerImg} 
+                alt={currentFloorData.name} 
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent flex flex-col justify-end p-6">
+                <div className="flex items-center space-x-2 mb-1">
+                  <span className="px-2.5 py-0.5 rounded-md bg-amber-400 text-slate-950 text-xs font-black">
+                    {currentFloorData.id}
+                  </span>
+                  <span className="text-xs text-amber-300 font-medium">{currentFloorData.subtitle}</span>
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-extrabold text-white">{currentFloorData.name}</h3>
+                <p className="text-xs sm:text-sm text-slate-300 mt-2 max-w-2xl line-clamp-2">
+                  {currentFloorData.description}
+                </p>
+              </div>
+            </div>
+
+            {/* Highlights Bar */}
+            <div className="bg-slate-800/50 border border-slate-800 rounded-xl p-4 flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold text-amber-400 uppercase tracking-wider flex items-center gap-1 mr-2">
+                <Sparkles className="w-3.5 h-3.5" /> 樓層亮點
+              </span>
+              {currentFloorData.highlights.map((h, i) => (
+                <span key={i} className="px-3 py-1 rounded-full text-xs font-medium bg-slate-900 border border-slate-700 text-slate-200">
+                  {h}
+                </span>
+              ))}
+            </div>
+
+            {/* SPOTS GRID */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-lg font-bold text-white">熱門專櫃與設施 ({currentFloorData.spots.length})</h4>
+              </div>
+
+              {currentFloorData.spots.length === 0 ? (
+                <div className="text-center py-12 bg-slate-800/30 rounded-2xl border border-dashed border-slate-800">
+                  <Info className="w-10 h-10 text-slate-600 mx-auto mb-2" />
+                  <p className="text-slate-400 font-medium">此樓層沒有符合關鍵字「{searchQuery}」的專櫃</p>
+                  <button 
+                    onClick={() => { setSearchQuery(''); setSelectedCategory('全部'); }}
+                    className="mt-3 text-xs text-amber-400 hover:underline"
+                  >
+                    清除搜尋條件
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {currentFloorData.spots.map(spot => {
+                    const isFav = favorites.includes(spot.id);
+                    return (
+                      <div 
+                        key={spot.id}
+                        className="bg-slate-800/90 border border-slate-700/80 rounded-2xl overflow-hidden hover:border-amber-400/60 transition group flex flex-col justify-between shadow-lg"
+                      >
+                        <div className="relative h-40 overflow-hidden cursor-pointer" onClick={() => setModalSpot(spot)}>
+                          <img 
+                            src={spot.image} 
+                            alt={spot.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                          />
+                          <div className="absolute top-3 right-3 flex items-center gap-1.5">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleFavorite(spot.id);
+                              }}
+                              className="p-2 rounded-full bg-slate-900/70 backdrop-blur-md text-white hover:text-rose-500 transition"
+                            >
+                              <Heart className={`w-4 h-4 ${isFav ? 'fill-rose-500 text-rose-500' : ''}`} />
+                            </button>
+                          </div>
+                          <div className="absolute bottom-2 left-2">
+                            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-950/80 backdrop-blur-md text-amber-300 border border-amber-400/30">
+                              {spot.category}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="p-4 flex-1 flex flex-col justify-between cursor-pointer" onClick={() => setModalSpot(spot)}>
+                          <div>
+                            <div className="flex items-start justify-between">
+                              <h5 className="font-bold text-white text-base group-hover:text-amber-300 transition line-clamp-1">{spot.name}</h5>
+                            </div>
+                            
+                            <div className="flex items-center gap-2 mt-1.5 text-xs text-slate-400">
+                              <span className="flex items-center gap-1 text-amber-400 font-bold">
+                                <Star className="w-3.5 h-3.5 fill-amber-400" /> {spot.rating}
+                              </span>
+                              <span>•</span>
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-3.5 h-3.5" /> {spot.stayTime}
+                              </span>
+                            </div>
+
+                            <p className="text-xs text-slate-300 mt-2.5 line-clamp-2 leading-relaxed">
+                              {spot.description}
+                            </p>
+                          </div>
+
+                          <div className="mt-4 pt-3 border-t border-slate-700/60 flex items-center justify-between text-xs">
+                            <span className="text-slate-400 flex items-center gap-1">
+                              <MapPin className="w-3 h-3 text-slate-500" /> {spot.location}
+                            </span>
+                            <span className="text-amber-400 font-semibold group-hover:translate-x-1 transition flex items-center gap-0.5">
+                              詳細攻略 <ChevronRight className="w-3 h-3" />
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- FAVORITES SECTION --- */}
+      {favorites.length > 0 && (
+        <section id="favorites" className="py-12 bg-slate-900 border-t border-slate-800">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h3 className="text-xl font-bold text-white flex items-center gap-2 mb-6">
+              <Heart className="w-5 h-5 text-rose-500 fill-rose-500" />
+              我的逛街清單 ({favorites.length})
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {FLOORS_DATA.flatMap(f => f.spots).filter(s => favorites.includes(s.id)).map(spot => (
+                <div key={spot.id} className="bg-slate-800 p-3 rounded-xl border border-slate-700 flex items-center gap-3">
+                  <img src={spot.image} alt={spot.name} className="w-12 h-12 rounded-lg object-cover" />
+                  <div className="flex-1 min-w-0">
+                    <h5 className="text-xs font-bold text-white truncate">{spot.name}</h5>
+                    <p className="text-[11px] text-slate-400">{spot.location}</p>
+                  </div>
+                  <button 
+                    onClick={() => toggleFavorite(spot.id)}
+                    className="text-slate-500 hover:text-rose-400"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* --- PRACTICAL INFO & PARKING CALCULATOR --- */}
+      <section id="practical" className="py-16 bg-slate-900/80 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <h3 className="text-2xl font-bold text-white">實用逛街資訊 & 停車試算器</h3>
+            <p className="text-sm text-slate-400 mt-2">快速掌握營業時間、停車優惠折抵與捷運/接駁車交通</p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Opening Hours & Facilities */}
+            <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 rounded-xl bg-amber-400/10 text-amber-400">
+                  <Clock className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-white">營業時間資訊</h4>
+                  <p className="text-xs text-slate-400">Big City Operating Hours</p>
+                </div>
+              </div>
+              <div className="space-y-3 text-xs sm:text-sm text-slate-300">
+                <div className="flex justify-between pb-2 border-b border-slate-700/60">
+                  <span>週日 ~ 週四：</span>
+                  <span className="font-semibold text-white">11:00 - 21:30</span>
+                </div>
+                <div className="flex justify-between pb-2 border-b border-slate-700/60">
+                  <span>週五 / 週六 / 假日前夕：</span>
+                  <span className="font-semibold text-white">11:00 - 22:00</span>
+                </div>
+                <div className="flex justify-between pb-2 border-b border-slate-700/60">
+                  <span>愛買 a-mart (B3)：</span>
+                  <span className="font-semibold text-white">09:00 - 22:00</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>威秀影城 (4F)：</span>
+                  <span className="font-semibold text-white">依當日場次開放</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Parking Calculator */}
+            <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 rounded-xl bg-amber-400/10 text-amber-400">
+                  <Calculator className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-white">停車費折抵試算器</h4>
+                  <p className="text-xs text-slate-400">汽車每小時 $60 / 機車免費</p>
+                </div>
+              </div>
+
+              <div className="space-y-4 text-xs">
+                <div>
+                  <label className="block text-slate-300 font-medium mb-1">預計停放時間：{parkingHours} 小時</label>
+                  <input 
+                    type="range" 
+                    min="1" 
+                    max="8" 
+                    value={parkingHours}
+                    onChange={(e) => setParkingHours(Number(e.target.value))}
+                    className="w-full accent-amber-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-medium mb-1">館內消費總金額 (NT$)：</label>
+                  <input 
+                    type="number" 
+                    step="500"
+                    value={spendAmount}
+                    onChange={(e) => setSpendAmount(Number(e.target.value))}
+                    className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  <input 
+                    type="checkbox" 
+                    id="movie"
+                    checked={hasMovieTicket}
+                    onChange={(e) => setHasMovieTicket(e.target.checked)}
+                    className="rounded text-amber-400 focus:ring-amber-400 accent-amber-400"
+                  />
+                  <label htmlFor="movie" className="text-slate-300 cursor-pointer">持有威秀影城電影票根 (可免費折抵 3 小時)</label>
+                </div>
+
+                <div className="mt-4 p-3 rounded-xl bg-slate-900 border border-slate-700/80 space-y-1">
+                  <div className="flex justify-between text-slate-300">
+                    <span>可折抵時數：</span>
+                    <span className="font-bold text-emerald-400">{parkingResult.discountHours} 小時</span>
+                  </div>
+                  <div className="flex justify-between text-slate-300">
+                    <span>預計應付停車費：</span>
+                    <span className="font-bold text-amber-400 text-sm">NT$ {parkingResult.totalFee}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Shuttle Bus & Transport */}
+            <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 rounded-xl bg-amber-400/10 text-amber-400">
+                  <Car className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-white">交通與免費接駁車</h4>
+                  <p className="text-xs text-slate-400">新竹火車站往返接駁專車</p>
+                </div>
+              </div>
+
+              <div className="space-y-3 text-xs text-slate-300">
+                <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800">
+                  <p className="font-bold text-amber-300 mb-1">🚌 免費接駁車上車點</p>
+                  <p>• 新竹火車站前站 (SOGO旁專屬候車亭)</p>
+                  <p>• 巨城購物中心1F 專屬接駁站</p>
+                </div>
+                <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800">
+                  <p className="font-bold text-amber-300 mb-1">⏱ 發車班次頻率</p>
+                  <p>• 平日：約 15 - 20 分鐘一班</p>
+                  <p>• 假日/例假日：約 10 - 15 分鐘一班</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- FOOTER --- */}
+      <footer className="bg-slate-950 py-8 border-t border-slate-900 text-center text-xs text-slate-500">
+        <div className="max-w-7xl mx-auto px-4">
+          <p>© 2026 Big City Hsinchu Interactive Guide. 本網站為互動式逛街攻略導覽。</p>
+          <p className="mt-1">地址：300 新竹市東區中央路229號 | 電話：(03) 621-8888</p>
+        </div>
+      </footer>
+
+      {/* --- MODAL DIALOG FOR DETAIL SPOT VIEW --- */}
+      {modalSpot && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl relative">
+            <button 
+              onClick={() => setModalSpot(null)}
+              className="absolute top-3 right-3 z-10 p-2 rounded-full bg-slate-950/60 text-slate-300 hover:text-white transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="relative h-56">
+              <img src={modalSpot.image} alt={modalSpot.name} className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
+              <div className="absolute bottom-3 left-4">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-400 text-slate-950">
+                  {modalSpot.category}
+                </span>
+                <h4 className="text-xl font-extrabold text-white mt-1">{modalSpot.name}</h4>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-4 text-xs sm:text-sm">
+              <div className="grid grid-cols-2 gap-3 bg-slate-800/60 p-3 rounded-xl border border-slate-700/60">
+                <div>
+                  <span className="text-slate-400 block text-[11px]">位置櫃位</span>
+                  <span className="font-semibold text-slate-200">{modalSpot.location}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block text-[11px]">建議停留時間</span>
+                  <span className="font-semibold text-amber-400">{modalSpot.stayTime}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block text-[11px]">專櫃連絡電話</span>
+                  <span className="font-semibold text-slate-200">{modalSpot.phone}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block text-[11px]">顧客評價</span>
+                  <span className="font-bold text-amber-400 flex items-center gap-1">
+                    <Star className="w-3.5 h-3.5 fill-amber-400" /> {modalSpot.rating} / 5.0
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <h5 className="font-bold text-white text-xs uppercase tracking-wider text-amber-400 mb-1">關於品牌 / 設施</h5>
+                <p className="text-slate-300 leading-relaxed text-xs sm:text-sm">{modalSpot.description}</p>
+              </div>
+
+              <div className="bg-amber-400/10 border border-amber-400/20 p-3.5 rounded-xl">
+                <h5 className="font-bold text-amber-300 text-xs flex items-center gap-1.5 mb-1">
+                  <Sparkles className="w-4 h-4" /> 必體驗 / 必吃招牌推薦
+                </h5>
+                <p className="text-slate-200 text-xs font-medium">{modalSpot.mustTry}</p>
+              </div>
+
+              <div className="flex flex-wrap gap-1.5 pt-2">
+                {modalSpot.tags.map((t, idx) => (
+                  <span key={idx} className="px-2.5 py-1 rounded-md bg-slate-800 text-slate-400 text-[11px]">
+                    #{t}
+                  </span>
+                ))}
+              </div>
+
+              <div className="pt-2 flex gap-3">
+                <button 
+                  onClick={() => {
+                    toggleFavorite(modalSpot.id);
+                  }}
+                  className={`flex-1 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition text-xs ${
+                    favorites.includes(modalSpot.id)
+                      ? 'bg-rose-600 text-white'
+                      : 'bg-slate-800 text-slate-200 border border-slate-700 hover:bg-slate-700'
+                  }`}
+                >
+                  <Heart className={`w-4 h-4 ${favorites.includes(modalSpot.id) ? 'fill-white' : ''}`} />
+                  {favorites.includes(modalSpot.id) ? '已加入收藏' : '加入逛街清單'}
+                </button>
+                <button 
+                  onClick={() => setModalSpot(null)}
+                  className="px-5 py-2.5 rounded-xl bg-amber-400 font-bold text-slate-950 text-xs hover:bg-amber-300 transition"
+                >
+                  關閉視窗
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
