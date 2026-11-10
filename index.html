@@ -12,24 +12,14 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   
-  <!-- Babel Standalone (解析 JSX) -->
+  <!-- Babel Standalone -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  
-  <!-- Lucide Icons (圖示庫) -->
-  <script src="https://unpkg.com/lucide-react@0.263.1/dist/umd/lucide-react.min.js"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen">
   <div id="root"></div>
 
   <script type="text/babel">
     const { useState, useMemo } = React;
-    
-    // 載入 Lucide 圖示
-    const { 
-      Search, MapPin, Clock, DollarSign, Bookmark, BookmarkCheck, 
-      Sparkles, Car, Utensils, ShoppingBag, Film, Gamepad2, 
-      Info, X, ChevronRight, Filter, Navigation, Compass, Star 
-    } = lucide;
 
     // 樓層資料
     const FLOOR_DATA = [
@@ -90,29 +80,26 @@
 
     // 推薦行程資料
     const ITINERARIES = [
-      { id: 'foodie', name: '吃貨美食之旅', icon: 'Utensils', desc: '專為饕客設計，品嚐米其林推薦與熱門甜點。', floors: ['7F', 'B1'] },
-      { id: 'family', name: '親子同樂半日遊', icon: 'Sparkles', desc: '放電首選！暢玩主題樂園、室內運動與親子餐飲。', floors: ['8F', '4F'] },
-      { id: 'photo', name: '網美打卡必訪', icon: 'Compass', desc: '舊金山異國街景與最潮時尚專櫃一次收藏。', floors: ['7F', '1F'] },
-      { id: 'shopping', name: '時尚潮流購物狂', icon: 'ShoppingBag', desc: '從國際精品到戶外運動品牌，輕鬆補齊潮流裝備。', floors: ['1F', '4F'] }
+      { id: 'foodie', name: '吃貨美食之旅', desc: '專為饕客設計，品嚐米其林推薦與熱門甜點。', floors: ['7F', 'B1'] },
+      { id: 'family', name: '親子同樂半日遊', desc: '放電首選！暢玩主題樂園、室內運動與親子餐飲。', floors: ['8F', '4F'] },
+      { id: 'photo', name: '網美打卡必訪', desc: '舊金山異國街景與最潮時尚專櫃一次收藏。', floors: ['7F', '1F'] },
+      { id: 'shopping', name: '時尚潮流購物狂', desc: '從國際精品到戶外運動品牌，輕鬆補齊潮流裝備。', floors: ['1F', '4F'] }
     ];
 
     function BigCityGuide() {
       const [selectedFloor, setSelectedFloor] = useState('7F');
-      const [selectedCategory, setSelectedCategory] = useState('all');
       const [searchQuery, setSearchQuery] = useState('');
       const [activeModalSpot, setActiveModalSpot] = useState(null);
       const [bookmarks, setBookmarks] = useState([]);
       const [parkingHours, setParkingHours] = useState(2);
       const [parkingSpend, setParkingSpend] = useState(1000);
 
-      // 收藏切換
       const toggleBookmark = (spotId) => {
         setBookmarks(prev => 
           prev.includes(spotId) ? prev.filter(id => id !== spotId) : [...prev, spotId]
         );
       };
 
-      // 停車費計算邏輯
       const parkingCalc = useMemo(() => {
         const ratePerHour = 50;
         const baseFreeHours = Math.floor(parkingSpend / 1000);
@@ -122,27 +109,23 @@
         return { totalFreeHours, fee };
       }, [parkingHours, parkingSpend]);
 
-      // 篩選出的景點
       const filteredSpots = useMemo(() => {
         const currentFloorObj = FLOOR_DATA.find(f => f.id === selectedFloor);
         if (!currentFloorObj) return [];
 
         return currentFloorObj.spots.filter(spot => {
-          const matchesSearch = spot.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                spot.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()));
-          const matchesCat = selectedCategory === 'all' || currentFloorObj.category === selectedCategory;
-          return matchesSearch && matchesCat;
+          return spot.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                 spot.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()));
         });
-      }, [selectedFloor, selectedCategory, searchQuery]);
+      }, [selectedFloor, searchQuery]);
 
       return (
         <div class="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
-          {/* 頂部導覽列 */}
           <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-4 py-3 sm:px-8">
             <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
               <div class="flex items-center gap-3">
-                <div class="bg-gradient-to-r from-amber-500 to-amber-600 p-2.5 rounded-xl text-slate-950 font-bold shadow-lg shadow-amber-500/20">
-                  <Navigation class="w-6 h-6" />
+                <div class="bg-gradient-to-r from-amber-500 to-amber-600 px-3 py-2 rounded-xl text-slate-950 font-bold shadow-lg">
+                  📍
                 </div>
                 <div>
                   <h1 class="text-xl font-bold bg-gradient-to-r from-amber-200 via-amber-400 to-amber-500 bg-clip-text text-transparent">
@@ -152,43 +135,37 @@
                 </div>
               </div>
 
-              {/* 搜尋列 */}
               <div class="relative w-full md:w-80">
-                <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
                   type="text" 
-                  placeholder="搜尋品牌、餐廳、甜點..."
+                  placeholder="🔍 搜尋品牌、餐廳、甜點..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  class="w-full bg-slate-800/80 border border-slate-700/80 rounded-full pl-9 pr-4 py-2 text-sm text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                  class="w-full bg-slate-800 border border-slate-700 rounded-full px-4 py-2 text-sm text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
               </div>
             </div>
           </header>
 
           <main class="max-w-7xl mx-auto px-4 py-6 sm:px-8 flex-1 space-y-8">
-            {/* 主題推薦行程 */}
             <section class="space-y-4">
-              <div class="flex items-center gap-2">
-                <Sparkles class="w-5 h-5 text-amber-400" />
-                <h2 class="text-lg font-bold text-slate-200">主題情境推薦路線</h2>
-              </div>
+              <h2 class="text-lg font-bold text-slate-200">✨ 主題情境推薦路線</h2>
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {ITINERARIES.map(item => (
                   <button 
                     key={item.id}
                     onClick={() => setSelectedFloor(item.floors[0])}
-                    class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/60 hover:border-amber-500/50 transition-all text-left group flex flex-col justify-between"
+                    class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700 hover:border-amber-500 transition-all text-left flex flex-col justify-between"
                   >
                     <div>
-                      <div class="text-amber-400 font-semibold mb-1 group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
-                        {item.name} <ChevronRight class="w-4 h-4" />
+                      <div class="text-amber-400 font-semibold mb-1">
+                        {item.name} →
                       </div>
                       <p class="text-xs text-slate-400 leading-relaxed">{item.desc}</p>
                     </div>
                     <div class="mt-3 flex gap-1">
                       {item.floors.map(f => (
-                        <span key={f} class="text-[10px] bg-slate-700/60 text-amber-300 px-2 py-0.5 rounded">
+                        <span key={f} class="text-[10px] bg-slate-700 text-amber-300 px-2 py-0.5 rounded">
                           {f}
                         </span>
                       ))}
@@ -198,7 +175,6 @@
               </div>
             </section>
 
-            {/* 樓層選單 */}
             <section class="space-y-4">
               <div class="flex flex-wrap gap-2 pb-2 border-b border-slate-800">
                 {FLOOR_DATA.map(floor => (
@@ -207,7 +183,7 @@
                     onClick={() => setSelectedFloor(floor.id)}
                     class={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
                       selectedFloor === floor.id
-                        ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20 scale-105'
+                        ? 'bg-amber-500 text-slate-950 shadow-lg scale-105'
                         : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
                     }`}
                   >
@@ -216,7 +192,6 @@
                 ))}
               </div>
               
-              {/* 當前樓層簡介 */}
               {FLOOR_DATA.find(f => f.id === selectedFloor) && (
                 <div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-4">
                   <h3 class="text-lg font-bold text-amber-300">
@@ -229,29 +204,28 @@
               )}
             </section>
 
-            {/* 卡片網格列表 */}
             <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredSpots.map(spot => {
                 const isBookmarked = bookmarks.includes(spot.id);
                 return (
                   <div 
                     key={spot.id}
-                    class="bg-slate-800/70 border border-slate-700/60 rounded-2xl overflow-hidden hover:border-amber-500/40 transition-all flex flex-col group"
+                    class="bg-slate-800/70 border border-slate-700 rounded-2xl overflow-hidden hover:border-amber-500/40 transition-all flex flex-col"
                   >
                     <div class="relative h-48 overflow-hidden">
                       <img 
                         src={spot.img} 
                         alt={spot.name}
-                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        class="w-full h-full object-cover"
                       />
                       <button 
                         onClick={() => toggleBookmark(spot.id)}
-                        class="absolute top-3 right-3 p-2 bg-slate-900/70 backdrop-blur-md rounded-full text-amber-400 hover:bg-slate-900"
+                        class="absolute top-3 right-3 p-2 bg-slate-900/80 rounded-full text-amber-400"
                       >
-                        {isBookmarked ? <BookmarkCheck class="w-5 h-5 fill-amber-400" /> : <Bookmark class="w-5 h-5" />}
+                        {isBookmarked ? '🔖' : '🏷️'}
                       </button>
-                      <span class="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur-md text-amber-300 text-xs px-2.5 py-1 rounded-md flex items-center gap-1">
-                        <Clock class="w-3.5 h-3.5" /> {spot.time}
+                      <span class="absolute bottom-3 left-3 bg-slate-900/80 text-amber-300 text-xs px-2.5 py-1 rounded-md">
+                        ⏱️ {spot.time}
                       </span>
                     </div>
 
@@ -264,19 +238,19 @@
                             </span>
                           ))}
                         </div>
-                        <h4 class="text-lg font-bold text-slate-100 group-hover:text-amber-300 transition-colors">
+                        <h4 class="text-lg font-bold text-slate-100">
                           {spot.name}
                         </h4>
-                        <p class="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">
+                        <p class="text-xs text-slate-400 mt-2 leading-relaxed">
                           {spot.desc}
                         </p>
                       </div>
 
                       <button 
                         onClick={() => setActiveModalSpot(spot)}
-                        class="w-full py-2.5 bg-slate-700/60 hover:bg-amber-500 hover:text-slate-950 text-slate-200 text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5"
+                        class="w-full py-2.5 bg-slate-700/60 hover:bg-amber-500 hover:text-slate-950 text-slate-200 text-sm font-semibold rounded-xl transition-all"
                       >
-                        看詳細與推薦必試 <ChevronRight class="w-4 h-4" />
+                        看詳細與推薦必試 →
                       </button>
                     </div>
                   </div>
@@ -284,12 +258,8 @@
               })}
             </section>
 
-            {/* 實用工具：停車費計算器 */}
-            <section class="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-6 space-y-4">
-              <div class="flex items-center gap-2">
-                <Car class="w-5 h-5 text-amber-400" />
-                <h3 class="text-lg font-bold text-slate-200">巨城停車折抵計算器</h3>
-              </div>
+            <section class="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 space-y-4">
+              <h3 class="text-lg font-bold text-slate-200">🚗 巨城停車費折扣計算器</h3>
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-center">
                 <div>
                   <label class="text-xs text-slate-400 block mb-2">預計停放時間 (小時)</label>
@@ -312,7 +282,7 @@
                     class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-slate-100"
                   />
                 </div>
-                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/80 text-center">
+                <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 text-center">
                   <div class="text-xs text-slate-400">預估需支付停車費</div>
                   <div class="text-2xl font-bold text-amber-400 mt-1">
                     NT$ {parkingCalc.fee}
@@ -325,15 +295,14 @@
             </section>
           </main>
 
-          {/* 品牌詳情 Modal */}
           {activeModalSpot && (
             <div class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-              <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl relative animate-in fade-in zoom-in duration-200">
+              <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl relative">
                 <button 
                   onClick={() => setActiveModalSpot(null)}
                   class="absolute top-4 right-4 p-2 bg-slate-950/60 rounded-full text-slate-400 hover:text-slate-100 z-10"
                 >
-                  <X class="w-5 h-5" />
+                  ✕
                 </button>
                 <div class="h-56 relative">
                   <img src={activeModalSpot.img} alt={activeModalSpot.name} class="w-full h-full object-cover" />
@@ -348,16 +317,16 @@
                 <div class="p-6 space-y-4">
                   <p class="text-sm text-slate-300 leading-relaxed">{activeModalSpot.desc}</p>
                   
-                  <div class="bg-slate-800/80 p-3.5 rounded-xl border border-slate-700/60 space-y-1">
-                    <div class="text-xs font-bold text-amber-400 flex items-center gap-1">
-                      <Star class="w-4 h-4" /> 推薦必試 / 必買
+                  <div class="bg-slate-800 p-3.5 rounded-xl border border-slate-700 space-y-1">
+                    <div class="text-xs font-bold text-amber-400">
+                      ⭐ 推薦必試 / 必買
                     </div>
                     <div class="text-xs text-slate-200">{activeModalSpot.mustTry}</div>
                   </div>
 
-                  <div class="bg-slate-800/80 p-3.5 rounded-xl border border-slate-700/60 space-y-1">
-                    <div class="text-xs font-bold text-amber-400 flex items-center gap-1">
-                      <Info class="w-4 h-4" /> 逛街小貼士
+                  <div class="bg-slate-800 p-3.5 rounded-xl border border-slate-700 space-y-1">
+                    <div class="text-xs font-bold text-amber-400">
+                      💡 逛街小貼士
                     </div>
                     <div class="text-xs text-slate-300">{activeModalSpot.tip}</div>
                   </div>
@@ -373,15 +342,13 @@
             </div>
           )}
 
-          {/* 頁腳 */}
           <footer class="border-t border-slate-800 bg-slate-950 py-6 px-4 text-center text-xs text-slate-500">
-            <p>新竹遠東巨城購物中心 (Big City) 互動導覽網站 - 網頁部署示範</p>
+            <p>新竹遠東巨城購物中心 (Big City) 互動導覽網站</p>
           </footer>
         </div>
       );
     }
 
-    // 渲染至 Root 節點
     ReactDOM.createRoot(document.getElementById('root')).render(<BigCityGuide />);
   </script>
 </body>
